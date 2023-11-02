@@ -45,6 +45,11 @@ pub struct TransformGizmoEvent {
     pub interaction: TransformGizmoInteraction,
 }
 
+#[derive(Debug, Clone, Event)]
+pub struct GizmoUpdate {
+    pub entity: Entity,
+}
+
 #[derive(Component, Default, Clone, Debug)]
 pub struct GizmoTransformable;
 
@@ -93,7 +98,8 @@ impl Plugin for TransformGizmoPlugin {
             picking::GizmoPickingPlugin,
             Ui3dNormalization,
         ))
-        .add_event::<TransformGizmoEvent>();
+        .add_event::<TransformGizmoEvent>()
+        .add_event::<GizmoUpdate>();
 
         // Input Set
         app.add_systems(
@@ -202,6 +208,7 @@ fn drag_gizmo(
     mut gizmo_mut: Query<&mut TransformGizmo>,
     mut transform_query: Query<
         (
+            Entity,
             &PickSelection,
             Option<&Parent>,
             &mut Transform,
@@ -209,6 +216,7 @@ fn drag_gizmo(
         ),
         Without<TransformGizmo>,
     >,
+    mut ev_gizmo_update: EventWriter<GizmoUpdate>,
     parent_query: Query<&GlobalTransform>,
     gizmo_query: Query<(&GlobalTransform, &PickingInteraction), With<TransformGizmo>>,
 ) {
@@ -250,19 +258,22 @@ fn drag_gizmo(
     };
     let selected_iter = transform_query
         .iter_mut()
-        .filter(|(s, ..)| s.is_selected)
-        .map(|(_, parent, local_transform, initial_global_transform)| {
-            let parent_global_transform = match parent {
-                Some(parent) => match parent_query.get(parent.get()) {
-                    Ok(transform) => *transform,
-                    Err(_) => GlobalTransform::IDENTITY,
-                },
-                None => GlobalTransform::IDENTITY,
-            };
-            let parent_mat = parent_global_transform.compute_matrix();
-            let inverse_parent = parent_mat.inverse();
-            (inverse_parent, local_transform, initial_global_transform)
-        });
+        .filter(|(_, s, ..)| s.is_selected)
+        .map(
+            |(entity, _, parent, local_transform, initial_global_transform)| {
+                ev_gizmo_update.send(GizmoUpdate { entity: entity });
+                let parent_global_transform = match parent {
+                    Some(parent) => match parent_query.get(parent.get()) {
+                        Ok(transform) => *transform,
+                        Err(_) => GlobalTransform::IDENTITY,
+                    },
+                    None => GlobalTransform::IDENTITY,
+                };
+                let parent_mat = parent_global_transform.compute_matrix();
+                let inverse_parent = parent_mat.inverse();
+                (inverse_parent, local_transform, initial_global_transform)
+            },
+        );
     if let Some(interaction) = gizmo.current_interaction {
         if gizmo.initial_transform.is_none() {
             gizmo.initial_transform = Some(gizmo_transform);
