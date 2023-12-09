@@ -126,7 +126,9 @@ impl Plugin for TransformGizmoPlugin {
                     .in_set(TransformGizmoSystem::Hover)
                     .in_set(PickSet::Backend)
                     .after(RaycastSystem::UpdateRaycast::<GizmoRaycastSet>),
-                grab_gizmo.in_set(TransformGizmoSystem::Grab),
+                grab_gizmo
+                    .in_set(TransformGizmoSystem::Grab)
+                    .after(PickSet::Focus),
             )
                 .chain()
                 .in_set(TransformGizmoSystem::InputsSet)
