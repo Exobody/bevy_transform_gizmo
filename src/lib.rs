@@ -527,14 +527,20 @@ fn grab_gizmo(
     initial_transform_query: Query<Entity, With<InitialTransform>>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
-        for (mut gizmo, mut interaction, _transform) in gizmo_query.iter_mut() {
-            if *interaction == PickingInteraction::Hovered {
-                for (selection, transform, entity, rotation_origin_offset) in
+        for (mut gizmo, interaction, _transform) in gizmo_query.iter_mut() {
+            // if *interaction == PickingInteraction::Hovered {
+            //     for (selection, transform, entity, rotation_origin_offset) in
+            //         selected_items_query.iter()
+            //     {
+            //         ev_gizmo_update.send(GizmoUpdate::Hover { entity });
+            //     }
+            //     *interaction = PickingInteraction::Pressed;
+            if *interaction == PickingInteraction::Pressed {
+                for (_selection, _transform, entity, _rotation_origin_offset) in
                     selected_items_query.iter()
                 {
-                    ev_gizmo_update.send(GizmoUpdate::Hover { entity: entity });
+                    ev_gizmo_update.send(GizmoUpdate::Grab { entity });
                 }
-                *interaction = PickingInteraction::Pressed;
                 // Dragging has started, store the initial position of all selected meshes
                 for (selection, transform, entity, rotation_origin_offset) in
                     selected_items_query.iter()
