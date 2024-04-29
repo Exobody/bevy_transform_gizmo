@@ -65,6 +65,20 @@ pub enum GizmoUpdate {
     },
 }
 
+impl GizmoUpdate {
+    pub fn entity(&self) -> &Entity {
+        match self {
+            GizmoUpdate::Hover { entity } => &entity,
+            GizmoUpdate::Grab { entity } => &entity,
+            GizmoUpdate::Drag {
+                entity,
+                interaction: _,
+            } => &entity,
+            GizmoUpdate::Release { entity } => &entity,
+        }
+    }
+}
+
 #[derive(Component, Default, Clone, Debug)]
 pub struct GizmoTransformable;
 
