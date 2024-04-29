@@ -36,23 +36,23 @@ fn setup(
     commands.spawn((
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Plane::from_size(5.0))),
-            material: materials.add(Color::rgb(0.8, 0.8, 0.8).into()),
+            material: materials.add(Color::rgb(0.8, 0.8, 0.8)),
             ..Default::default()
         },
         bevy_mod_picking::PickableBundle::default(),
-        bevy_mod_picking::backends::raycast::RaycastPickTarget::default(),
+        bevy_mod_picking::backends::raycast::RaycastPickable::default(),
         bevy_transform_gizmo::GizmoTransformable,
     ));
     // cube
     commands.spawn((
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-            material: materials.add(Color::rgb(0.8, 0.8, 0.8).into()),
+            material: materials.add(Color::rgb(0.8, 0.8, 0.8)),
             transform: Transform::from_xyz(0.0, 0.5, 0.0),
             ..Default::default()
         },
         bevy_mod_picking::PickableBundle::default(),
-        bevy_mod_picking::backends::raycast::RaycastPickTarget::default(),
+        bevy_mod_picking::backends::raycast::RaycastPickable::default(),
         bevy_transform_gizmo::GizmoTransformable,
     ));
     // light
@@ -66,13 +66,13 @@ fn setup(
             transform: Transform::from_xyz(2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..Default::default()
         },
-        bevy_mod_picking::backends::raycast::RaycastPickCamera::default(),
+        bevy_mod_picking::backends::raycast::RaycastPickable,
         bevy_transform_gizmo::GizmoPickSource::default(),
     ));
 }
 
 fn entity_change(mut ev_gizmo: EventReader<GizmoUpdate>) {
-    for event in ev_gizmo.iter() {
+    for event in ev_gizmo.read() {
         dbg!(event);
     }
 }
