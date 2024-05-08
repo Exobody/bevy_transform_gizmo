@@ -38,4 +38,5 @@ bevy_mod_picking = { version = "0.18", default-features = false, features = [
     "backend_raycast",
     "highlight",
     "bevy_picking_raycast",
+    "backend_egui",
 ] }
